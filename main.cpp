@@ -28,13 +28,13 @@ static GLfloat ground[][4] = {
     { 0.3, 0.3, 0.3, 1.0 }
 };
 
-const double dt(0.001),g(-9.8);
+const double dt(0.01),g(-9.8);
 double bx(0),bz(0),by(1); //向きを示す棒の位置として使っているが現在は動かしていない
 double ex = 0, ey = -1.0, ez = -10.0 ,rx = 0,ry =0; //視点の位置と向きr(x方向回転とy方向回転)
 int sum_point(0), sum_num(0); //合計得点と投げた回数
 int cource(1); //コースの番号
 int situation(0); //０はまだ発射してない。１は発射して飛んでいる状態、２は的に当たった後
-double px(0),py(0),pz(5),vx(0),vy(5),vz(0),v(15); //ボールの位置と速度
+double px(0),py(0.5),pz(5),vx(0),vy(5),vz(0),v(15); //ボールの位置と速度
 
 //単純な図形を描写する関数のプロトタイプ宣言
 void DrawLine(GLfloat width, GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2, GLdouble y2, GLdouble z2);
@@ -43,7 +43,7 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r);
 void draw_sphere(double x,double y,double z,double r);
 void DrawString(double x, double y, string s);
 void draw_square(double x,double y,double z,double r);
-
+void draw_pachinko(GLdouble x, GLdouble y, GLdouble z, GLdouble xrotation, GLdouble yrotation, GLdouble zrotation);
 //まとクラス
 class mato{
 protected:
@@ -215,39 +215,36 @@ void display(void)
     glRotated(ry, -1.0, 0.0, 0.0);
     glTranslated(ex, ey, ez);
     
-    if (cource == 1){
-        scene();
-        //ボールが飛んでいく方向を示す棒
-        bx = sin(3*rx/180.0*PI);
-        bz = cos(3*rx/180.0*PI);
-        DrawLine(2,0,0,5,bx,by,bz); //動いているように見えるが景色に対しては動いてない
-        
-        draw_sphere(px,py,pz,0.2);
-        
-        for(int i(0); i < num_mato1; i++){
-            matos1[i].mato_draw();
-        }
-        
-        for(int i(0); i < num_move_mato1; i++){
-            move_matos1[i].mato_draw();
-        }
-    } else if (cource == 2){
+    if (cource < 4){
         scene();
         draw_sphere(px,py,pz,0.2);
-        for(int i(0); i < num_mato2; i++){
-            matos2[i].mato_draw();
-        }
-        for(int i(0); i < num_move_mato2; i++){
-            move_matos2[i].mato_draw();
-        }
-    } else if (cource == 3) {
-        scene();
-        draw_sphere(px,py,pz,0.2);
-        for(int i(0); i < num_mato3; i++){
-            matos3[i].mato_draw();
-        }
-        for(int i(0); i < num_move_mato3; i++){
-            move_matos3[i].mato_draw();
+        draw_pachinko(0, 0.5, 5,0,0,0);
+        if (cource == 1){
+            //ボールが飛んでいく方向を示す棒
+            bx = sin(3*rx/180.0*PI);
+            bz = cos(3*rx/180.0*PI);
+            DrawLine(2,0,0,5,bx,by,bz); //動いているように見えるが景色に対しては動いてない
+            for(int i(0); i < num_mato1; i++){
+                matos1[i].mato_draw();
+            }
+            
+            for(int i(0); i < num_move_mato1; i++){
+                move_matos1[i].mato_draw();
+            }
+        } else if (cource == 2){
+            for(int i(0); i < num_mato2; i++){
+                matos2[i].mato_draw();
+            }
+            for(int i(0); i < num_move_mato2; i++){
+                move_matos2[i].mato_draw();
+            }
+        } else if (cource == 3) {
+            for(int i(0); i < num_mato3; i++){
+                matos3[i].mato_draw();
+            }
+            for(int i(0); i < num_move_mato3; i++){
+                move_matos3[i].mato_draw();
+            }
         }
     }
     
@@ -363,7 +360,7 @@ void keyboard(unsigned char key, int x, int y)
         case 'r':
             if (cource < 4) {
                 px = 0;
-                py = 0;
+                py = 0.5;
                 pz = 5;
                 vx = 0;
                 vy = 5;
@@ -376,18 +373,20 @@ void keyboard(unsigned char key, int x, int y)
             exit(0);
             break;
         case 'q':
-            vy = 5;
-            vy += ry * 0.5;
-            cout << ry;
-            if (cource < 4) {
-                if (sum_num <= 4){ //これで５回まで発射することができる
-                    sum_num += 1;
-                    situation = 1;//これによって状況が飛んでいる状況に変わる。
-                }else {
-                    sum_num = 0;
-                    cource += 1;
+            if (situation  == 0){
+                vy = 5;
+                vy += ry * 0.5;
+                cout << ry;
+                if (cource < 4) {
+                    if (sum_num <= 4){ //これで５回まで発射することができる
+                        sum_num += 1;
+                        situation = 1;//これによって状況が飛んでいる状況に変わる。
+                    }else {
+                        sum_num = 0;
+                        cource += 1;
+                    }
+                    break;
                 }
-                break;
             }
     }
     glutPostRedisplay();
@@ -512,3 +511,21 @@ void draw_square(double x,double y,double z,double r){
     glEnd();
     glPopMatrix();
 }
+
+void draw_pachinko(GLdouble x, GLdouble y, GLdouble z, GLdouble xrotation, GLdouble yrotation, GLdouble zrotation){
+    glPushMatrix();
+    glTranslated(x, y, z);
+    glRotated(xrotation, 1.0, 0.0, 0.0);
+    glRotated(yrotation, 0.0, 1.0, 0.0);
+    glRotated(zrotation, 0.0, 0.0, 1.0);
+    GLdouble x1, y1;
+    for (int i = 90; i < 270; i+=5) {
+        x1 = sin(PI*i / 180.0)/3; y1 = cos(PI*i / 180.0)/3;
+        draw_sphere(x1, y1, 0, 0.1);
+    }
+    for (double y = -0.45; y > -1.0; y-=0.01) {
+        draw_sphere(0, y, 0, 0.1);
+    }
+    glPopMatrix();
+}
+
