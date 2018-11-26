@@ -43,7 +43,7 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r);
 void draw_sphere(double x,double y,double z,double r);
 void DrawString(double x, double y, string s);
 void draw_square(double x,double y,double z,double r);
-void draw_pachinko(GLdouble x, GLdouble y, GLdouble z, GLdouble xrotation, GLdouble yrotation, GLdouble zrotation);
+void draw_pachinko(GLdouble x, GLdouble y, GLdouble z);
 //まとクラス
 class mato{
 protected:
@@ -200,6 +200,20 @@ void not_move_scene(){
     glPopMatrix();
 }
 
+void draw_main() {
+    double x = 5 * sin(-rx / 60.0 + PI);
+    double z = 5 * cos(-rx / 60.0 + PI);
+    glPushMatrix(); //これは視点に対して回転する
+    glTranslated(x, 0, z + 5);
+    draw_sphere(px,py,pz,0.2); //初期位置 x = 0 y = 0.5,z = 5
+    
+    glPushMatrix();
+//    glRotated(rx, 0.0, 1.0, 0.0);//パチンコそのものの回転(要検討　このままだと、大きな円を書いて回る)
+    draw_pachinko(0, 0.5, 5);
+    glPopMatrix();
+    
+    glPopMatrix();
+}
 //ここが描写を行う上でのmainとなる関数
 void display(void)
 {
@@ -217,8 +231,7 @@ void display(void)
     
     if (cource < 4){
         scene();
-        draw_sphere(px,py,pz,0.2);
-        draw_pachinko(0, 0.5, 5,0,0,0);
+        draw_main(); //ballとパチンコの描写
         if (cource == 1){
             //ボールが飛んでいく方向を示す棒
             bx = sin(3*rx/180.0*PI);
@@ -512,18 +525,16 @@ void draw_square(double x,double y,double z,double r){
     glPopMatrix();
 }
 
-void draw_pachinko(GLdouble x, GLdouble y, GLdouble z, GLdouble xrotation, GLdouble yrotation, GLdouble zrotation){
+void draw_pachinko(GLdouble x, GLdouble y, GLdouble z){
     glPushMatrix();
     glTranslated(x, y, z);
-    glRotated(xrotation, 1.0, 0.0, 0.0);
-    glRotated(yrotation, 0.0, 1.0, 0.0);
-    glRotated(zrotation, 0.0, 0.0, 1.0);
     GLdouble x1, y1;
     for (int i = 90; i < 270; i+=5) {
-        x1 = sin(PI*i / 180.0)/3; y1 = cos(PI*i / 180.0)/3;
+        x1 = sin(PI*i / 180.0)/3;
+        y1 = cos(PI*i / 180.0)/3;
         draw_sphere(x1, y1, 0, 0.1);
     }
-    for (double y = -0.45; y > -1.0; y-=0.01) {
+    for (double y = -0.45; y > -1.0; y-=0.05) {
         draw_sphere(0, y, 0, 0.1);
     }
     glPopMatrix();
