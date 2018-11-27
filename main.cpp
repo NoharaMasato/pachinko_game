@@ -20,9 +20,10 @@ using namespace std;
 /* 物体の色 */
 static GLfloat red[] = { 0.8, 0.2, 0.2, 1.0 };
 static GLfloat black[] = { 0, 0, 0, 1.0 };
-//static GLfloat green[] = { 0.2, 0.8, 0.2, 1.0 };
+static GLfloat brown[] = { 0.5, 0.0, 0.0, 1.0 };
 static GLfloat blue[] = { 0.2, 0.2, 0.8, 1.0 };
 static GLfloat yellow[] = { 0.8, 0.8, 0.2, 1.0 };
+static GLfloat green[] = { 0.2, 0.8, 0.2, 1.0 };
 static GLfloat ground[][4] = {
     { 0.6, 0.6, 0.6, 1.0 },
     { 0.3, 0.3, 0.3, 1.0 }
@@ -44,6 +45,7 @@ void draw_sphere(double x,double y,double z,double r);
 void DrawString(double x, double y, string s);
 void draw_square(double x,double y,double z,double r);
 void draw_pachinko(GLdouble x, GLdouble y, GLdouble z);
+void draw_tree(double x,double z);
 //まとクラス
 class mato{
 protected:
@@ -51,7 +53,6 @@ protected:
     double cpoint; //まとの点数
 public:
     mato(double x,double y,double z, double r, int point);
-    mato();
     int hantei();
     void mato_draw();
 };
@@ -184,6 +185,7 @@ void not_move_scene(){
     if (cource < 4) {
         init_liting();
         glRotated(0, 0.0, 1.0, 0.0);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, black);
         stringstream score;
         score <<"score:" << sum_point;
         glTranslated(0, 0, -9);
@@ -220,7 +222,6 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// 画面クリア
     
     not_move_scene();//これは画面に対して動かない
-    
     // モデルビュー変換行列の初期化
     glPushMatrix();
     glLoadIdentity();
@@ -259,8 +260,19 @@ void display(void)
                 move_matos3[i].mato_draw();
             }
         }
+        //    木の描写
+        draw_tree(0,-5);
+        draw_tree(1.5,-5);
+        draw_tree(-1.5,-5);
+        draw_tree(-3,-5);
+        draw_tree(5,-7);
+        draw_tree(-5,-7);
+        draw_tree(3,-7);
+        draw_tree(-3,-3);
+        draw_tree(0,-3);
+        draw_tree(8,-3);
+        draw_tree(9,-3);
     }
-    
     glFlush();
     glPopMatrix();
 }
@@ -334,7 +346,6 @@ void idle(void){
     glutPostRedisplay();
 }
 
-
 void keyboard(unsigned char key, int x, int y)
 {
     switch (key) {
@@ -357,10 +368,14 @@ void keyboard(unsigned char key, int x, int y)
             ez--;
             break;
         case 'u':
-            rx--;
+            if (rx > -30) { //左右方向に30度ずつう動くようにした
+                rx--;
+            }
             break;
         case 'i':
-            rx++;
+            if (rx < 30) {
+                rx++;
+            }
             break;
         case 'j':
             ry--;
@@ -444,11 +459,10 @@ void DrawLine(GLfloat width, GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2,
     glPopMatrix();
 }
 
-// xrotation x軸方向回転、yrotation y軸方向回転
+//まとを描写
 void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
     glPushMatrix();
     glTranslated(x,y,z);
-    
     if (x > 4){ //これによって左右x軸方向に離れすぎれているものは円の法線方向を発射点に向くようにずらしている（必要かどうか？）
         glRotated(-20, 0.0, 1.0, 0.0);
     } else if (x < -4) {
@@ -462,8 +476,8 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
     for (int i = 0; i < 100; i++) {
         // 座標を計算
         float rate = (double)i / 100;
-        x1 = r * cos(2 * M_PI * rate);
-        y1 = r * sin(2 * M_PI * rate);
+        x1 = r * cos(2 * PI * rate);
+        y1 = r * sin(2 * PI * rate);
         glVertex3f(x1, y1, 0); // 頂点座標を指定
     }
     glEnd();
@@ -478,7 +492,7 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
     glPopMatrix();
 }
 
-//draw_circleのオーバーライド（あと何球打てるかを表示させている）
+//draw_circleのオーバーロード（あと何球打てるかを表示させている）
 void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r){
     glPushMatrix();
     glTranslated(x,y,z);
@@ -540,3 +554,14 @@ void draw_pachinko(GLdouble x, GLdouble y, GLdouble z){
     glPopMatrix();
 }
 
+void draw_tree(double x,double z){
+    glPushMatrix();
+    glTranslated(x, 0, z);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, brown);
+    DrawLine(15, 0.0, -0.5, 0, 0.0, 1.5, 0);    // 線の描画(x軸)
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, green);
+    for(int i=0 ; i<=360; i++){
+        DrawLine(2, 0,2.0, 0.0, 0.5*sin(PI*i/180.0),0.5,0.5*cos(PI*i/180.0)); // 線の描画(x軸)
+    }
+    glPopMatrix();
+}
