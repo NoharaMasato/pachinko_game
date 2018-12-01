@@ -468,19 +468,27 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
     } else if (x < -4) {
         glRotated(20, 0.0, 1.0, 0.0);
     }
-    //    これは塗りつぶしたまと。こっちの方が圧倒的に実行スピードが早い
-    GLdouble x1, y1;
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
-    glBegin(GL_POLYGON);
-    glNormal3d(0.0, 0.0, 1.0);
-    for (int i = 0; i < 100; i++) {
-        // 座標を計算
-        float rate = (double)i / 100;
-        x1 = r * cos(2 * PI * rate);
-        y1 = r * sin(2 * PI * rate);
-        glVertex3f(x1, y1, 0); // 頂点座標を指定
+    int q(0); //まとをしましまsにするために必要な変数
+    for (double j(r); j > 0; j-=0.1){
+        GLdouble x1, y1;
+        q++;
+        if (q%2 == 0){//ここのif文でわ色を分けている。それをしながら円の大きさを変えていっている
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
+        } else {
+            glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
+        }
+        glTranslated(0,0,0.01);
+        glBegin(GL_POLYGON);
+        glNormal3d(0.0, 0.0, 1.0);
+        for (int i = 0; i < 100; i++) {
+            // 座標を計算
+            float rate = (double)i / 100;
+            x1 = j * cos(2 * PI * rate);
+            y1 = j * sin(2 * PI * rate);
+            glVertex3f(x1, y1, 0); // 頂点座標を指定
+        }
+        glEnd();
     }
-    glEnd();
     glPopMatrix();
     
     stringstream cpoint;
