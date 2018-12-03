@@ -210,7 +210,6 @@ void draw_main() {
     draw_sphere(px,py,pz,0.2); //初期位置 x = 0 y = 0.5,z = 5
     
     glPushMatrix();
-//    glRotated(rx, 0.0, 1.0, 0.0);//パチンコそのものの回転(要検討　このままだと、大きな円を書いて回る)
     draw_pachinko(0, 0.5, 5);
     glPopMatrix();
     
@@ -294,8 +293,8 @@ void resize(int w, int h){
 
 /*玉の位置を変える関数*/
 void ball_move() {
-    vx = v*sin(2*rx/180.0*PI);
-    vz = -v*cos(2*rx/180.0*PI);
+    vx = v*sin(1.5*rx/180.0*PI);
+    vz = -v*cos(1.5*rx/180.0*PI);
     vy += g*dt;
     px += vx*dt;
     py += vy*dt;
@@ -550,6 +549,7 @@ void draw_square(double x,double y,double z,double r){
 void draw_pachinko(GLdouble x, GLdouble y, GLdouble z){
     glPushMatrix();
     glTranslated(x, y, z);
+    glRotatef(-rx*1.5, 0.0, 1.0, 0.0);//パチンコそのものの回転(要検討　このままだと、大きな円を書いて回る)
     GLdouble x1, y1;
     for (int i = 90; i < 270; i+=5) {
         x1 = sin(PI*i / 180.0)/3;
