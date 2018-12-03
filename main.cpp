@@ -35,7 +35,8 @@ double ex = 0, ey = -1.0, ez = -10.0 ,rx = 0,ry =0; //視点の位置と向きr(
 int sum_point(0), sum_num(0); //合計得点と投げた回数
 int cource(1); //コースの番号
 int situation(0); //０はまだ発射してない。１は発射して飛んでいる状態、２は的に当たった後
-double px(0),py(0.5),pz(5),vx(0),vy(5),vz(0),v(15); //ボールの位置と速度
+int key_seq(0);
+double px(0),py(0.5),pz(5),vx(0),vy(5),vz(0),v(0); //ボールの位置と速度
 
 //単純な図形を描写する関数のプロトタイプ宣言
 void DrawLine(GLfloat width, GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2, GLdouble y2, GLdouble z2);
@@ -78,7 +79,6 @@ int mato::hantei(){
             situation = 2;
             vz = 0;
             vx = 0;
-            v = 0;
             return cpoint; //判定が成功したらそのまとの得点を返す
         }
     }
@@ -218,6 +218,7 @@ void draw_main() {
 //ここが描写を行う上でのmainとなる関数
 void display(void)
 {
+//    cout << "draw" << endl; //キーボードを押しつずけても約１２倍描写の方が早い
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// 画面クリア
     
     not_move_scene();//これは画面に対して動かない
@@ -293,6 +294,7 @@ void resize(int w, int h){
 
 /*玉の位置を変える関数*/
 void ball_move() {
+    v = 15 * key_seq / 10; //ここによってqを押した時間による速度の調整
     vx = v*sin(1.5*rx/180.0*PI);
     vz = -v*cos(1.5*rx/180.0*PI);
     vy += g*dt;
@@ -344,9 +346,37 @@ void idle(void){
     }
     glutPostRedisplay();
 }
-
-void keyboard(unsigned char key, int x, int y)
+void keyboardup(unsigned char key, int x, int y)
 {
+    switch (key) {
+        case 'q':
+            if (situation  == 0){ //発射される場合
+                vy = 5;
+                vy += ry * 0.5;
+                if (cource < 4) {
+                    if (sum_num <= 4){ //これで５回まで発射することができる
+                        sum_num += 1;
+                        situation = 1;//これによって状況が飛んでいる状況に変わる。
+                    }else {
+                        sum_num = 0;
+                        cource += 1;
+                    }
+                }
+            }
+            cout << key_seq << endl;
+            break;
+        case ',':
+            ex--;
+            break;
+        case 's':
+            ey++;
+            break;
+    }
+}
+
+void keyboard(unsigned char key, int x, int y) //x,yはキーボードの位置
+{
+//    cout << "key" << endl;
     switch (key) {
         case '.':
             ex++;
@@ -378,11 +408,9 @@ void keyboard(unsigned char key, int x, int y)
             break;
         case 'j':
             ry--;
-            //            cout << vy << endl;
             break;
         case '8':
             ry++;
-            //            cout << vy << endl;
             break;
         case 'r':
             if (cource < 4) {
@@ -392,29 +420,16 @@ void keyboard(unsigned char key, int x, int y)
                 vx = 0;
                 vy = 5;
                 vz = 0;
-                v = 15;
                 situation = 0;
+                key_seq = 0;
             }
             break;
         case '\033':
             exit(0);
             break;
         case 'q':
-            if (situation  == 0){
-                vy = 5;
-                vy += ry * 0.5;
-                cout << ry;
-                if (cource < 4) {
-                    if (sum_num <= 4){ //これで５回まで発射することができる
-                        sum_num += 1;
-                        situation = 1;//これによって状況が飛んでいる状況に変わる。
-                    }else {
-                        sum_num = 0;
-                        cource += 1;
-                    }
-                    break;
-                }
-            }
+            key_seq += 1;
+            break;
     }
     glutPostRedisplay();
 }
@@ -440,6 +455,7 @@ int main(int argc, char *argv[])
     glutDisplayFunc(display);
     glutReshapeFunc(resize);
     glutKeyboardFunc(keyboard);
+    glutKeyboardUpFunc(keyboardup);
     init();
     glutMainLoop();
     return 0;
