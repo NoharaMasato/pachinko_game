@@ -30,7 +30,6 @@ static GLfloat ground[][4] = {
 };
 
 const double dt(0.01),g(-9.8);
-double bx(0),bz(0),by(1); //向きを示す棒の位置として使っているが現在は動かしていない
 double ex = 0, ey = -1.0, ez = -10.0 ,rx = 0,ry =0; //視点の位置と向きr(x方向回転とy方向回転)
 int sum_point(0), sum_num(0); //合計得点と投げた回数
 int cource(1); //コースの番号
@@ -117,20 +116,6 @@ void move_mato::move(){ //ここで基底クラスのメンバにアクセスす
         mato_vy = -mato_vy;
     }
 }
-
-//コースクラス(個数が決まらないまとをメンバとして持つにはvectorが必要そう。)
-//class cource{
-//    static int num(0); //クラス変数にすれば引数にしなくても数を数えることができる
-//    int size;
-//    mato matos[]; //まとクラスのオブジェクトの配列をの持つ
-//public:
-//    cource(int size); //コンストラクタ
-//};
-//
-//cource::cource(int size, mato matos[]){
-//    cout << "コースが作成されました";
-//    num += 1;
-//}
 
 //まとクラスのインスタンス作成
 mato matos1[] = {mato(1,1,-3,0.7,100),mato(-1,1,-2,0.5,50),mato(0,3,0,1,200),mato(6,3,0,1,100)};//まとの定義
@@ -234,10 +219,6 @@ void display(void)
         scene();
         draw_main(); //ballとパチンコの描写
         if (cource == 1){
-            //ボールが飛んでいく方向を示す棒
-            bx = sin(3*rx/180.0*PI);
-            bz = cos(3*rx/180.0*PI);
-            DrawLine(2,0,0,5,bx,by,bz); //動いているように見えるが景色に対しては動いてない
             for(int i(0); i < num_mato1; i++){
                 matos1[i].mato_draw();
             }
@@ -260,19 +241,18 @@ void display(void)
                 move_matos3[i].mato_draw();
             }
         }
-        //    木の描写
-        draw_tree(0,-5);
-        draw_tree(1.5,-5);
-        draw_tree(-1.5,-5);
-        draw_tree(-3,-5);
-        draw_tree(5,-7);
-        draw_tree(-5,-7);
-        draw_tree(3,-7);
-        draw_tree(-3,-3);
-        draw_tree(0,-3);
-        draw_tree(8,-3);
-        draw_tree(9,-3);
     }
+    draw_tree(0,-5);//木の描写 ここに置くと光の影響を受けない（明るくなる）
+    draw_tree(1.5,-5);
+    draw_tree(-1.5,-5);
+    draw_tree(-3,-5);
+    draw_tree(5,-7);
+    draw_tree(-5,-7);
+    draw_tree(3,-7);
+    draw_tree(-3,-3);
+    draw_tree(0,-3);
+    draw_tree(8,-3);
+    draw_tree(9,-3);
     glFlush();
     glPopMatrix();
 }
@@ -483,7 +463,7 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
     } else if (x < -4) {
         glRotated(20, 0.0, 1.0, 0.0);
     }
-    int q(0); //まとをしましまsにするために必要な変数
+    int q(0); //まとをしましまにするために必要な変数
     for (double j(r); j > 0; j-=0.1){
         GLdouble x1, y1;
         q++;
@@ -492,12 +472,11 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
         } else {
             glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
         }
-        glTranslated(0,0,0.01);
+        glTranslated(0,0,0.01); //微妙に前側にずらすことによって、順に色をつけている
         glBegin(GL_POLYGON);
         glNormal3d(0.0, 0.0, 1.0);
         for (int i = 0; i < 100; i++) {
-            // 座標を計算
-            float rate = (double)i / 100;
+            float rate = (double)i / 100; // 座標を計算
             x1 = j * cos(2 * PI * rate);
             y1 = j * sin(2 * PI * rate);
             glVertex3f(x1, y1, 0); // 頂点座標を指定
