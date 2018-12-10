@@ -50,6 +50,7 @@ void DrawString(double x, double y, string s);
 void draw_square(double x,double y,double z,double r);
 void draw_pachinko(GLdouble x, GLdouble y, GLdouble z);
 void draw_tree(double x,double z);
+
 //まとクラス
 class mato{
 protected:
@@ -550,7 +551,8 @@ void draw_square(double x,double y,double z,double r){
 void draw_pachinko(GLdouble x, GLdouble y, GLdouble z){
     glPushMatrix();
     glTranslated(x, y, z);
-    glRotatef(-rx*1.5, 0.0, 1.0, 0.0);//パチンコそのものの回転(要検討　このままだと、大きな円を書いて回る)
+    glRotatef(-rx*1.5, 0.0, 1.0, 0.0);//パチンコそのものの回転(視点を変えるとパチンコも動く)
+//    glRotatef(key_seq*3, -1.0, 0.0, 0.0);//パチンコが力を溜める時の回転(このままだとおかしい)
     GLdouble x1, y1;
     for (int i = 90; i < 270; i+=5) {
         x1 = sin(PI*i / 180.0)/3;
