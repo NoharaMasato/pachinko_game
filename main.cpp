@@ -10,10 +10,14 @@
 #include<sstream>
 #include <stdlib.h>
 #include <math.h>
-#include <OpenGL/OpenGL.h>
-#include <GLUT/GLUT.h>
 
+#include <OpenGL/OpenGL.h> //mac用
+#include <GLUT/GLUT.h>
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+//#include "sh_16dio_2adda.h" //ad,daをち使うときに読み込むべき
+//#include <GL/glut.h>// cygwin用
+
 using namespace std;
 #define PI 3.1415926535897932384626433832795
 
@@ -178,10 +182,9 @@ void not_move_scene(){
         for (int i(0); i < 5 - sum_num; i++) { //残りの打つことができる玉の描写
             draw_circle(1.35 + i * 0.1,1.7,1,0.05);
         }
-    } else {
+    } else { //これ出力されていない
         stringstream end;
         end <<"END";
-        cout << "end";
         DrawString(0,0, end.str());
     }
     glPopMatrix();
@@ -274,9 +277,12 @@ void resize(int w, int h){
 
 /*玉の位置を変える関数*/
 void ball_move() {
-    v = 15 * key_seq / 10; //ここによってqを押した時間による速度の調整
-    vx = v*sin(1.5*rx/180.0*PI);
-    vz = -v*cos(1.5*rx/180.0*PI);
+    if (situation != 2){
+        vx = v*sin(1.5*rx/180.0*PI);
+        vz = -v*cos(1.5*rx/180.0*PI);
+    } else if (situation == 2){
+        vx = 0;vz = 0;
+    }
     vy += g*dt;
     px += vx*dt;
     py += vy*dt;
@@ -329,10 +335,10 @@ void idle(void){
 void keyboardup(unsigned char key, int x, int y)
 {
     switch (key) {
-        case 'q':
+        case 'q': //qのキーを離した時
             if (situation  == 0){ //発射される場合
-                vy = 5;
-                vy += ry * 0.5;
+                vy = 5 + ry * 0.5;
+                v = 15 * key_seq / 10; //ここによってqを押した時間による速度の調整
                 if (cource < 4) {
                     if (sum_num <= 4){ //これで５回まで発射することができる
                         sum_num += 1;
