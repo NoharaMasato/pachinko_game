@@ -212,7 +212,14 @@ void display(void)
     //最後＊*20程度にすれば、しcigwinでの反転を防ぐことができた（村上先生より、初期値が設定されてなかったからとのこと）
     //rx = (get_ad(hCom, 0) - 2500) / 2500 * 20; //ここで1つ目のポテンションメータからの値を得ている(-180<rx<180(deg))(cyg)
     //ry = (get_ad(hCom, 1) - 2500) / 2500 * 20; //ここで2つ目のポテンションメータからの値を得ている(-180<ry<180(deg))
-
+    
+    //    double parusu(0);
+    //    parusu = get_di(hCom, 0); //これがモータの回転数を測るパルス数
+    //    double rad = parusu / 2048.0 / 33.0 * 360; //回転角度
+    //    double da0 = 2500 - rad * 200; // 2000は比例定数で変更の必要(パチンコを引くのはモータの回転と逆方向のなのでマイナスをつける。つまりは、回転角radはマイナスの値になるはず。) radが０の時、
+    //    set_da(hCom, 0, 3000); //今は一定で3000にしている(本当はda0にする)
+    //    cout << "rad=" << rad << ",da0=" << da0 << ",parusu=" << parusu << endl;
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// 画面クリア
     
     not_move_scene();//これは画面に対して動かない
