@@ -15,8 +15,9 @@
 #include <GLUT/GLUT.h>
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
-//#include "sh_16dio_2adda.h" //ad,daをち使うときに読み込むべき
+//#include "sh_16dio_2adda.h" //ad,daをち使うときに読み込むべき(cyg)
 //#include <GL/glut.h>// cygwin用
+//HANDLE hCom;
 
 using namespace std;
 #define PI 3.1415926535897932384626433832795
@@ -78,11 +79,12 @@ void mato::mato_draw(){
 //このメンバ関数を常に呼び出し続ける
 int mato::hantei(){
     if (situation == 1){
-        if((cx-px)*(cx-px)+(cy-py)*(cy-py) < cr*cr && cz - 1 <= pz && pz <= cz){//当たったらという条件分岐
+        if((cx-px)*(cx-px)+(cy-py)*(cy-py) < cr*cr && cz - 1 <= pz && pz <= cz){//当たったらという条件分岐(考慮する必要がありそう)
             cout << cpoint << "点の的に当たりました"<< endl;
             situation = 2;
             vz = 0;
-            vx = 0;
+            pz = cz;
+            vy = 0;
             return cpoint; //判定が成功したらそのまとの得点を返す
         }
     }
@@ -207,7 +209,10 @@ void draw_main() {
 //ここが描写を行う上でのmainとなる関数
 void display(void)
 {
-//    cout << "draw" << endl; //キーボードを押しつずけても約１２倍描写の方が早い
+    //最後＊*20程度にすれば、しcigwinでの反転を防ぐことができた（村上先生より、初期値が設定されてなかったからとのこと）
+    //rx = (get_ad(hCom, 0) - 2500) / 2500 * 20; //ここで1つ目のポテンションメータからの値を得ている(-180<rx<180(deg))(cyg)
+    //ry = (get_ad(hCom, 1) - 2500) / 2500 * 20; //ここで2つ目のポテンションメータからの値を得ている(-180<ry<180(deg))
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);// 画面クリア
     
     not_move_scene();//これは画面に対して動かない
@@ -465,11 +470,11 @@ void DrawLine(GLfloat width, GLdouble x1, GLdouble y1, GLdouble z1, GLdouble x2,
 void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
     glPushMatrix();
     glTranslated(x,y,z);
-    if (x > 4){ //これによって左右x軸方向に離れすぎれているものは円の法線方向を発射点に向くようにずらしている（必要かどうか？）
-        glRotated(-20, 0.0, 1.0, 0.0);
-    } else if (x < -4) {
-        glRotated(20, 0.0, 1.0, 0.0);
-    }
+//    if (x > 4){ //これによって左右x軸方向に離れすぎれているものは円の法線方向を発射点に向くようにずらしている（必要かどうか？）
+//        glRotated(-20, 0.0, 1.0, 0.0);
+//    } else if (x < -4) {
+//        glRotated(20, 0.0, 1.0, 0.0);
+//    }
     int q(0); //まとをしましまにするために必要な変数
     for (double j(r); j > 0; j-=0.1){
         GLdouble x1, y1;
@@ -479,7 +484,7 @@ void draw_circle(GLdouble x, GLdouble y, GLdouble z, GLdouble r, int point){
         } else {
             glMaterialfv(GL_FRONT, GL_DIFFUSE, blue);
         }
-        glTranslated(0,0,0.01); //微妙に前側にずらすことによって、順に色をつけている
+        glTranslated(0,0,0.0001); //微妙に前側にずらすことによって、順に色をつけている
         glBegin(GL_POLYGON);
         glNormal3d(0.0, 0.0, 1.0);
         for (int i = 0; i < 100; i++) {
